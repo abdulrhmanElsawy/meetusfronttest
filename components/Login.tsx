@@ -6,7 +6,6 @@ import Image from "next/image";
 import Link from "next/link";
 import '@/styles/Login.css';
 import { LockKeyhole, Mail } from "lucide-react";
-import axios from 'axios';
 import Cookies from 'js-cookie'; 
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { RootState } from '@/store/store';
@@ -23,7 +22,6 @@ const Login = () => {
     const dispatch = useAppDispatch();
     const { isLoading, token } = useAppSelector((state: RootState) => state.auth);
 
-
     useEffect(() => {
         const token = Cookies.get('jwtToken');
         if (token) {
@@ -31,32 +29,34 @@ const Login = () => {
         }
     }, [router]);
 
-
     const validateEmail = (email: string) => {
         const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return re.test(email);
     };
 
     useEffect(() => {
-        if (email && password) {
+        if (validateEmail(email) && password) {
             setIsButtonEnabled(true);
+            setError('');  
+        } else if (email && !validateEmail(email)) {
+            setIsButtonEnabled(false);
         } else {
             setIsButtonEnabled(false);
         }
     }, [email, password]);
 
-
     const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        setIsLoggingIn(true)
+        setIsLoggingIn(true);
         dispatch(loginUser({ email, password }));
     };
 
     useEffect(() => {
-            if (token) {
-                router.push('/dashboard');
-            }
+        if (token) {
+            router.push('/dashboard');
+        }
     }, [token, router]);
+
     return (
         <section className='login'>
             <div className='login-wrapper'>
@@ -109,7 +109,7 @@ const Login = () => {
                         </button>
                     </form>
 
-                    <h2>Don&apos;t have an account ? <Link href="/sign-up" aria-label="signup link">Sign up</Link></h2>
+                    <h2>Don&apos;t have an account? <Link href="/sign-up" aria-label="signup link">Sign up</Link></h2>
                 </div>
             </div>
         </section>
