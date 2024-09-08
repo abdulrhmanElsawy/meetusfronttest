@@ -24,8 +24,11 @@ async ({ email, password }: { email: string; password: string }, { rejectWithVal
         { headers: { 'Content-Type': 'application/json' } }
     );
 
-    const { token } = loginResponse.data;
+    const { token, expiresIn } = loginResponse.data; 
+    const expirationDate = new Date(new Date().getTime() + expiresIn * 1000); 
+
     Cookies.set('jwtToken', token, { secure: true, sameSite: 'Strict' });
+    Cookies.set('tokenExpiry', expirationDate.getTime().toString());
 
     const userInfoResponse = await axios.get(
         'https://api-yeshtery.dev.meetusvr.com/v1/user/info',
@@ -56,6 +59,7 @@ reducers: {
     Cookies.remove('jwtToken');
     Cookies.remove('userId');
     Cookies.remove('userName');
+    Cookies.remove('tokenExpiry');
     state.token = null;
     state.userId = null;
     state.userName = null;
