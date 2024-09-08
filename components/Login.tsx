@@ -105,7 +105,7 @@ return (
             </button>
         </form>
 
-        <h2>Don't have an account? <Link href="/sign-up" aria-label="signup link">Sign up</Link></h2>
+        <h2>Don&apos;t have an account? <Link href="/sign-up" aria-label="signup link">Sign up</Link></h2>
         </div>
     </div>
     </section>
