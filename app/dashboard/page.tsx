@@ -1,34 +1,19 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useAppSelector, useAppDispatch } from '@/store/hooks';
+import { logout } from '@/store/authSlice';
+import { RootState } from '@/store/store';
 import Image from 'next/image';
-import Cookies from 'js-cookie';
-import '@/styles/Dashboard.css';
-
+import '@/styles/Dashboard.css'
 
 const Dashboard = () => {
-    const [userId, setUserId] = useState('');
-    const [userName, setUserName] = useState('');
+    const dispatch = useAppDispatch();
     const router = useRouter();
-
-    useEffect(() => {
-        const token = Cookies.get('jwtToken'); 
-        if (!token) {
-            router.push('/');
-            return;
-        }
-
-        const id = Cookies.get('userId'); 
-        const name = Cookies.get('userName');
-        setUserId(id || '');
-        setUserName(name || '');
-    }, [router]);
+    const { userId, userName } = useAppSelector((state: RootState) => state.auth);
 
     const handleLogout = () => {
-        Cookies.remove('jwtToken'); 
-        Cookies.remove('userId');
-        Cookies.remove('userName');
+        dispatch(logout());
         router.push('/');
     };
 

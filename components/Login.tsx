@@ -8,6 +8,10 @@ import '@/styles/Login.css';
 import { LockKeyhole, Mail } from "lucide-react";
 import axios from 'axios';
 import Cookies from 'js-cookie'; 
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { RootState } from '@/store/store';
+import { loginUser } from '@/store/authSlice';
+
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -16,6 +20,9 @@ const Login = () => {
     const [isLoggingIn, setIsLoggingIn] = useState(false); 
     const [error, setError] = useState('');
     const router = useRouter();
+    const dispatch = useAppDispatch();
+    const { isLoading, token } = useAppSelector((state: RootState) => state.auth);
+
 
     useEffect(() => {
         const token = Cookies.get('jwtToken');
@@ -24,60 +31,32 @@ const Login = () => {
         }
     }, [router]);
 
+
     const validateEmail = (email: string) => {
         const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return re.test(email);
     };
 
     useEffect(() => {
-        if (validateEmail(email) && password) {
+        if (email && password) {
             setIsButtonEnabled(true);
-            setError(''); 
         } else {
             setIsButtonEnabled(false);
         }
     }, [email, password]);
 
-    const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+
+    const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        setIsLoggingIn(true);
-
-        try {
-            const loginResponse = await axios.post(
-                'https://api-yeshtery.dev.meetusvr.com/v1/yeshtery/token',
-                { email, password, isEmployee: true },
-                { headers: { 'Content-Type': 'application/json' } }
-            );
-
-            const { token } = loginResponse.data;
-
-            Cookies.set('jwtToken', token, { secure: true, sameSite: 'Strict' });
-
-            const userInfoResponse = await axios.get(
-                'https://api-yeshtery.dev.meetusvr.com/v1/user/info',
-                {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Authorization: `Bearer ${token}`
-                    }
-                }
-            );
-
-            const { id, name } = userInfoResponse.data;
-
-            Cookies.set('userId', id);
-            Cookies.set('userName', name);
-
-            router.push('/dashboard');
-
-        } catch (error) {
-            setError('Invalid credentials or error retrieving user info. Please try again.');
-            console.error('Login or user info retrieval failed:', error);
-        } finally {
-            setIsLoggingIn(false);
-        }
+        setIsLoggingIn(true)
+        dispatch(loginUser({ email, password }));
     };
 
+    useEffect(() => {
+            if (token) {
+                router.push('/dashboard');
+            }
+    }, [token, router]);
     return (
         <section className='login'>
             <div className='login-wrapper'>
