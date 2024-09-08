@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import { logout } from '@/store/authSlice';
 import { RootState } from '@/store/store';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import '@/styles/Dashboard.css'
 
@@ -12,10 +13,24 @@ const Dashboard = () => {
     const router = useRouter();
     const { userId, userName } = useAppSelector((state: RootState) => state.auth);
 
+    const [isClient, setIsClient] = useState(false);
+
+    useEffect(() => {
+        setIsClient(true);
+
+        if (!userId || !userName) {
+        router.push('/');
+        }
+    }, [userId, userName, router]);
+
     const handleLogout = () => {
         dispatch(logout());
         router.push('/');
     };
+
+    if (!isClient) {
+        return null;
+    }
 
     return (
         <section className='dashboard'>
